@@ -10,18 +10,14 @@ sig Color {
     nodeColors: set Node -- defines the color of each node
 }
 
--- graph is undirected
-pred symmetric {
+-- refs is undirected and irreflexive
+pred defRefs {
     ~refs in refs
-}
-
--- graph is irreflexive
-pred irreflexive {
     no iden & refs
 }
 
 -- each node has exactly one color
-pred oneColor {
+pred oneColorPerNode {
     all n : Node | one n.(~nodeColors)
 }
 -- defines distance metric for each node
@@ -34,7 +30,7 @@ pred defDists {
     }
 }
 
--- defines ori as an acyclic 
+-- defines acOri as an acyclic orientation of the graph from refs
 pred defOrientation {
     acOri in refs
     all u: Node | {
@@ -45,15 +41,14 @@ pred defOrientation {
     }
 }
 
--- defines that no two adjacent nodes should have the same color
+-- ensures that no two adjacent nodes should have the same color
 pred noAdjColors {
     all n : Node | nodeColors.n not in nodeColors.(n.refs)
 }
 
 pred setup {
-    symmetric
-    irreflexive
-    oneColor
+    defRefs
+    oneColorPerNode
     defDists
     defOrientation
     noAdjColors
