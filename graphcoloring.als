@@ -8,10 +8,10 @@ sig Color {
     nodeColors: set Node -- defines the color of each node
 }
 
--- refs is undirected and irreflexive
-pred defRefs {
-    ~refs in refs
-    no iden & refs
+-- graph is undirected and irreflexive
+pred defRefs[graph : Node -> Node] {
+    ~graph in graph
+    no iden & graph
 }
 
 pred empty {
@@ -22,7 +22,7 @@ pred empty {
     no acOri
 }
 
-/* check {empty => defRefs} */
+/* check {empty => defRefs[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {empty} */
@@ -71,7 +71,7 @@ pred single {
     no acOri
 }
 
-/* check {single => defRefs} */
+/* check {single => defRefs[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {single} */
@@ -87,7 +87,7 @@ pred twoReflexive {
     acOri = Node0->Node1
 }
 
-/* check {twoReflexive => defRefs} */
+/* check {twoReflexive => defRefs[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {twoReflexive} */
@@ -103,7 +103,7 @@ pred twoOneDirection {
     no acOri
 }
 
-/* check {twoOneDirection => not defRefs} */
+/* check {twoOneDirection => not defRefs[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {twoOneDirection} */
@@ -130,7 +130,7 @@ pred mostlyReflexiveMany {
     no acOri
 }
 
-/* check {mostlyReflexiveMany => not defRefs} */
+/* check {mostlyReflexiveMany => not defRefs[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {mostlyReflexiveMany} for 5 */
@@ -158,15 +158,22 @@ pred reflexiveMany {
          Node4->Node0 +  Node1->Node3
 }
 
-/* check {reflexiveMany => defRefs} */
+/* check {reflexiveMany => defRefs[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {reflexiveMany} for 5 */
 
 -- each node has exactly one color
-pred oneColorPerNode {
-    all n : Node | one n.(~nodeColors)
+pred oneColorPerNode[coloring : Color -> Node] {
+    all n : Node | one n.(~coloring)
 }
+
+// can be directed graph
+/* fun getDists [graph : Node->Node] : Node->Node->Int { */
+/*     all u : */ 
+    
+/* } */
+
 -- defines distance metric for each node
 pred defDists {
     all u : Node | all v : Node | {
@@ -305,18 +312,56 @@ pred reflexiveManyInvalidOrientationMissing {
 /* check {reflexiveManyInvalidOrientationMissing => not defOrientation} for 5 */
 
 -- ensures that no two adjacent nodes should have the same color
-pred noAdjColors {
-    all n : Node | nodeColors.n not in nodeColors.(n.refs)
+pred noAdjColors [graph : Node -> Node, coloring : Color -> Node]  {
+    all n : Node | coloring.n not in coloring.(n.graph)
 }
 
-pred setup {
-    defRefs
-    oneColorPerNode
-    defDists
-    defOrientation
-    noAdjColors
+pred validColoring [graph : Node -> Node, coloring : Color -> Node] {
+    noAdjColors[graph, coloring]
+    oneColorPerNode[coloring]
 }
 
-/* run {setup} for exactly 4 Node, exactly 2 Color */
+pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
+    validColoring[graph, coloring]
+    #(coloring.Node) <= k // number of "used" colors is k or lower
+}
+
+pred kColorable [graph : Node -> Node, k : Int] {
+    some coloring : Color->Node | validKColoring[graph, coloring, k]
+}
+
+pred isChromaticNumber [graph : Node->Node, k : Int] {
+    kColorable[graph, k]
+    no smaller : Int | smaller < k and kColorable[graph, smaller]
+}
+
+/* pred longestPathLength [graph : Node -> Node, len : Int] { */
+/*     some path : set Node when valid */
+    
+/* } */
+
+/* pred someColoring { */
+/*     defRefs[refs] */
+/*     validColoring[refs, nodeColors] */
+/* } */
+
+/* run {someColoring} for exactly 4 Node, exactly 2 Color */
+
+/* pred notThreeColorable { */
+/*     defRefs[refs] */
+/*     not kColorable[refs, 3] */
+/*     no dists */
+/*     no acOri */
+/*     no nodeColors */
+/* } */
+
+/* run {notThreeColorable} for exactly 4 Node, exactly 3 Color */
+
+pred graphChromaticNumberThree {
+    defRefs[refs]
+    isChromaticNumber[refs, 3]
+}
+
+run {graphChromaticNumberThree} for exactly 4 Node, exactly 4 Color
 
 -- vim: set filetype=forge tabstop=4 softtabstop=4 shiftwidth=4:
