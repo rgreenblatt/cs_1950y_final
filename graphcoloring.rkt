@@ -25,7 +25,7 @@ pred defDists {
     all u : Node | all v : Node | {
         u = v => dists[u][v] = sing[0]
         v in u.refs => dists[u][v] = sing[1]
-        v not in u.(^refs) => dists[u][v] = sing[-1]
+        (v not in u.(^refs)) and (not u = v) => dists[u][v] = sing[-1]
         ((v not in u.refs) and (not u = v) and (v in u.(^refs))) =>
             dists[u][v] = sing[add[min[dists[u.refs][v]], 1]]
     }
