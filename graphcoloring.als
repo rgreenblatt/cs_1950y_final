@@ -327,12 +327,13 @@ pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
 }
 
 pred kColorable [graph : Node -> Node, k : Int] {
+    k >= 0
     some coloring : Color->Node | validKColoring[graph, coloring, k]
 }
 
 pred isChromaticNumber [graph : Node->Node, k : Int] {
     kColorable[graph, k]
-    no smaller : Int | smaller < k and kColorable[graph, smaller]
+    not kColorable[graph, k-1]
 }
 
 /* pred longestPathLength [graph : Node -> Node, len : Int] { */
