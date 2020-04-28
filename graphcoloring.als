@@ -24,7 +24,8 @@ pred defDists {
         u = v => dists[u][v] = 0
         v in u.refs => dists[u][v] = 1
         v not in u.(^refs) => dists[u][v] = -1
-        ((v not in u.refs) and (not u = v) and (v in u.(^refs))) => dists[u][v] = add[min[dists[u.refs][v]], 1]
+        ((v not in u.refs) and (not u = v) and (v in u.(^refs))) =>
+            dists[u][v] = add[min[dists[u.refs][v]], 1]
     }
 }
 
@@ -53,3 +54,5 @@ pred setup {
 }
 
 run {setup} for exactly 4 Node, exactly 2 Color
+
+-- vim: set filetype=forge tabstop=4 softtabstop=4 shiftwidth=4:
