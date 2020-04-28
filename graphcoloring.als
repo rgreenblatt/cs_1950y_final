@@ -71,7 +71,7 @@ pred single {
     no acOri
 }
 
-/* check {single => defRefs} */ 
+/* check {single => defRefs} */
 
 // Verify some instance exists (some instance should exist)
 /* run {single} */
@@ -122,9 +122,9 @@ pred mostlyReflexiveMany {
     dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
-        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
         Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
-        Node1->Node3->2 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node1->Node3->2 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
     no acOri
@@ -149,9 +149,9 @@ pred reflexiveMany {
     dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
-        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
         Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
-        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
     acOri = Node0->Node1 +  Node0->Node2 + Node3->Node2 +  Node4->Node3 +
@@ -198,9 +198,9 @@ pred mostlyReflexiveManyWrongDist {
     dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
-        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
         Node4->Node0->1 + Node1->Node2->3 + Node2->Node1->2 +
-        Node1->Node3->2 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node1->Node3->2 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
     no acOri
@@ -222,9 +222,9 @@ pred reflexiveManyWrongDist {
     dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
-        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->2 + 
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->2 +
         Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
-        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
     no acOri
@@ -237,7 +237,7 @@ pred defOrientation {
     acOri in refs
     all u: Node | {
         -- acyclic
-        u->u not in ^acOri 
+        u->u not in ^acOri
          -- exactly one direction picked for each edge
         all v : u.refs | (u->v in acOri iff v->u not in acOri)
     }
@@ -262,9 +262,9 @@ pred reflexiveManyInvalidOrientationDup {
     dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
-        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
         Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
-        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
     acOri = Node0->Node1 +  Node0->Node2 + Node3->Node2 +  Node4->Node3 +
@@ -290,9 +290,9 @@ pred reflexiveManyInvalidOrientationMissing {
     dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
-        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
         Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
-        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
     acOri = Node0->Node1 +  Node3->Node2 +  Node4->Node3 +
