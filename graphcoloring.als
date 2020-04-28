@@ -84,7 +84,7 @@ pred twoReflexive {
     refs = Node0->Node1 + Node1->Node0
     dists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
         Node1->Node0->1
-    no acOri
+    acOri = Node0->Node1
 }
 
 /* check {twoReflexive => defRefs} */
@@ -154,7 +154,8 @@ pred reflexiveMany {
         Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
-    no acOri
+    acOri = Node0->Node1 +  Node0->Node2 + Node3->Node2 +  Node4->Node3 +
+         Node4->Node0 +  Node1->Node3
 }
 
 /* check {reflexiveMany => defRefs} */
@@ -241,6 +242,67 @@ pred defOrientation {
         all v : u.refs | (u->v in acOri iff v->u not in acOri)
     }
 }
+
+/* check {empty => defOrientation} */
+/* check {single => defOrientation} */
+/* check {twoReflexive => defOrientation} */
+/* check {reflexiveMany => defOrientation} */
+
+pred reflexiveManyInvalidOrientationDup {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+    acOri = Node0->Node1 +  Node0->Node2 + Node3->Node2 +  Node4->Node3 +
+         Node4->Node0 + Node1->Node3 + Node3->Node1
+}
+
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveManyInvalidOrientationDup} for 5 */
+
+/* check {reflexiveManyInvalidOrientationDup => not defOrientation} for 5 */
+
+pred reflexiveManyInvalidOrientationMissing {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+    acOri = Node0->Node1 +  Node3->Node2 +  Node4->Node3 +
+         Node4->Node0 + Node3->Node1
+}
+
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveManyInvalidOrientationMissing} for 5 */
+
+/* check {reflexiveManyInvalidOrientationMissing => not defOrientation} for 5 */
 
 -- ensures that no two adjacent nodes should have the same color
 pred noAdjColors {
