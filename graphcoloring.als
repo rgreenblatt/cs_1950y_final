@@ -14,7 +14,7 @@ pred defRefs {
     no iden & refs
 }
 
-pred Empty {
+pred empty {
     no Node
     no refs
     no dists
@@ -22,10 +22,10 @@ pred Empty {
     no acOri
 }
 
-/* check {Empty => defRefs} */
+/* check {empty => defRefs} */
 
 // Verify some instance exists (some instance should exist)
-/* run {Empty} */
+/* run {empty} */
 
 // Dirty hack to allow naming
 sig Node0 extends Node {
@@ -82,7 +82,8 @@ pred twoReflexive {
     #Node0 = 1
     #Node1 = 1
     refs = Node0->Node1 + Node1->Node0
-    dists = Node0->Node0->0 + Node0->Node1->1 + Node1->Node0->1
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
+        Node1->Node0->1
     no acOri
 }
 
@@ -90,6 +91,76 @@ pred twoReflexive {
 
 // Verify some instance exists (some instance should exist)
 /* run {twoReflexive} */
+
+pred twoOneDirection {
+    oneOfEach
+    Node = Node0 + Node1
+    #Node0 = 1
+    #Node1 = 1
+    refs = Node0->Node1
+    dists = Node0->Node0->0 + Node0->Node0->1 + Node0->Node1->1 +
+        Node1->Node0->-1
+    no acOri
+}
+
+/* check {twoOneDirection => not defRefs} */
+
+// Verify some instance exists (some instance should exist)
+/* run {twoOneDirection} */
+
+pred mostlyReflexiveMany {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
+        Node1->Node3->2 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+    no acOri
+}
+
+/* check {mostlyReflexiveMany => not defRefs} */
+
+// Verify some instance exists (some instance should exist)
+/* run {mostlyReflexiveMany} for 5 */
+
+pred reflexiveMany {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+    no acOri
+}
+
+/* check {reflexiveMany => defRefs} */
+
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveMany} for 5 */
 
 -- each node has exactly one color
 pred oneColorPerNode {
@@ -100,11 +171,65 @@ pred defDists {
     all u : Node | all v : Node | {
         u = v => dists[u][v] = 0
         v in u.refs => dists[u][v] = 1
-        v not in u.(^refs) => dists[u][v] = -1
+        (v not in u.(^refs)) and (not u = v) => dists[u][v] = -1
         ((v not in u.refs) and (not u = v) and (v in u.(^refs))) =>
             dists[u][v] = add[min[dists[u.refs][v]], 1]
     }
 }
+
+/* check {empty => defDists} */
+/* check {single => defDists} */
+/* check {twoReflexive => defDists} */
+/* check {mostlyReflexiveMany => defDists} */
+/* check {reflexiveMany => defDists} */
+
+pred mostlyReflexiveManyWrongDist {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 + 
+        Node4->Node0->1 + Node1->Node2->3 + Node2->Node1->2 +
+        Node1->Node3->2 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+    no acOri
+}
+
+/* check {mostlyReflexiveManyWrongDist => not defDists} */
+
+pred reflexiveManyWrongDist {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->2 + 
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 + 
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+    no acOri
+}
+
+/* check {reflexiveManyWrongDist => not defDists} */
 
 -- defines acOri as an acyclic orientation of the graph from refs
 pred defOrientation {
@@ -130,6 +255,6 @@ pred setup {
     noAdjColors
 }
 
-run {setup} for exactly 4 Node, exactly 2 Color
+/* run {setup} for exactly 4 Node, exactly 2 Color */
 
 -- vim: set filetype=forge tabstop=4 softtabstop=4 shiftwidth=4:
