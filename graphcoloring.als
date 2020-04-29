@@ -28,26 +28,26 @@ pred empty {
 /* run {empty} */
 
 // Dirty hack to allow naming
-sig Node0 extends Node {
-}
-sig Node1 extends Node {
-}
-sig Node2 extends Node {
-}
-sig Node3 extends Node {
-}
-sig Node4 extends Node {
-}
-sig Node5 extends Node {
-}
-sig Node6 extends Node {
-}
-sig Node7 extends Node {
-}
-sig Node8 extends Node {
-}
-sig Node9 extends Node {
-}
+sig Node0 extends Node {}
+sig Node1 extends Node {}
+sig Node2 extends Node {}
+sig Node3 extends Node {}
+sig Node4 extends Node {}
+sig Node5 extends Node {}
+sig Node6 extends Node {}
+sig Node7 extends Node {}
+sig Node8 extends Node {}
+sig Node9 extends Node {}
+sig Color0 extends Color {}
+sig Color1 extends Color {}
+sig Color2 extends Color {}
+sig Color3 extends Color {}
+sig Color4 extends Color {}
+sig Color5 extends Color {}
+sig Color6 extends Color {}
+sig Color7 extends Color {}
+sig Color8 extends Color {}
+sig Color9 extends Color {}
 
 pred oneOfEach {
     lone Node0
@@ -60,6 +60,16 @@ pred oneOfEach {
     lone Node7
     lone Node8
     lone Node9
+    lone Color0
+    lone Color1
+    lone Color2
+    lone Color3
+    lone Color4
+    lone Color5
+    lone Color6
+    lone Color7
+    lone Color8
+    lone Color9
 }
 
 pred single {
@@ -69,6 +79,8 @@ pred single {
     no refs
     dists = Node0->Node0->0
     no acOri
+    #Color0 = 1
+    nodeColors = Color0->Node0
 }
 
 /* check {single => defRefs[refs]} */
@@ -85,6 +97,9 @@ pred twoReflexive {
     dists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
         Node1->Node0->1
     acOri = Node0->Node1
+    #Color0 = 1
+    #Color1 = 1
+    nodeColors = Color0->Node0 + Color1->Node1
 }
 
 /* check {twoReflexive => defRefs[refs]} */
@@ -154,19 +169,19 @@ pred reflexiveMany {
         Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
+
     acOri = Node0->Node1 +  Node0->Node2 + Node3->Node2 +  Node4->Node3 +
          Node4->Node0 +  Node1->Node3
+    
+    #Color0 = 1
+    #Color1 = 1
+    nodeColors = Color0->(Node0 + Node3) + Color1->(Node1 + Node2 + Node4)
 }
-
-/* check {reflexiveMany => defRefs[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {reflexiveMany} for 5 */
 
--- each node has exactly one color
-pred oneColorPerNode[coloring : Color -> Node] {
-    all n : Node | one n.(~coloring)
-}
+/* check {reflexiveMany => defRefs[refs]} */
 
 // can be directed graph
 /* fun getDists [graph : Node->Node] : Node->Node->Int { */
@@ -174,7 +189,7 @@ pred oneColorPerNode[coloring : Color -> Node] {
     
 /* } */
 
--- defines distance metric for each node
+-- defines distance metric for each node (TODO: make general...)
 pred defDists {
     all u : Node | all v : Node | {
         u = v => dists[u][v] = 0
@@ -213,7 +228,10 @@ pred mostlyReflexiveManyWrongDist {
     no acOri
 }
 
-/* check {mostlyReflexiveManyWrongDist => not defDists} */
+// Verify some instance exists (some instance should exist)
+/* run {mostlyReflexiveManyWrongDist} for 5 */
+
+/* check {mostlyReflexiveManyWrongDist => not defDists} for 5 */
 
 pred reflexiveManyWrongDist {
     oneOfEach
@@ -237,23 +255,26 @@ pred reflexiveManyWrongDist {
     no acOri
 }
 
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveManyWrongDist} for 5 */
+
 /* check {reflexiveManyWrongDist => not defDists} */
 
--- defines acOri as an acyclic orientation of the graph from refs
-pred defOrientation {
-    acOri in refs
+-- checks acOri is an acyclic orientation of the graph
+pred validOrientation[graph : Node->Node, acOri : Node->Node] {
+    acOri in graph
     all u: Node | {
         -- acyclic
         u->u not in ^acOri
          -- exactly one direction picked for each edge
-        all v : u.refs | (u->v in acOri iff v->u not in acOri)
+        all v : u.graph | (u->v in acOri iff v->u not in acOri)
     }
 }
 
-/* check {empty => defOrientation} */
-/* check {single => defOrientation} */
-/* check {twoReflexive => defOrientation} */
-/* check {reflexiveMany => defOrientation} */
+/* check {empty => validOrientation[refs, acOri]} */
+/* check {single => validOrientation[refs, acOri]} */
+/* check {twoReflexive => validOrientation[refs, acOri]} */
+/* check {reflexiveMany => validOrientation[refs, acOri]} */
 
 pred reflexiveManyInvalidOrientationDup {
     oneOfEach
@@ -281,7 +302,7 @@ pred reflexiveManyInvalidOrientationDup {
 // Verify some instance exists (some instance should exist)
 /* run {reflexiveManyInvalidOrientationDup} for 5 */
 
-/* check {reflexiveManyInvalidOrientationDup => not defOrientation} for 5 */
+/* check {reflexiveManyInvalidOrientationDup => not validOrientation[refs, acOri]} for 5 */
 
 pred reflexiveManyInvalidOrientationMissing {
     oneOfEach
@@ -309,60 +330,179 @@ pred reflexiveManyInvalidOrientationMissing {
 // Verify some instance exists (some instance should exist)
 /* run {reflexiveManyInvalidOrientationMissing} for 5 */
 
-/* check {reflexiveManyInvalidOrientationMissing => not defOrientation} for 5 */
+/* check {reflexiveManyInvalidOrientationMissing => not validOrientation[refs, acOri]} for 5 */
 
 -- ensures that no two adjacent nodes should have the same color
 pred noAdjColors [graph : Node -> Node, coloring : Color -> Node]  {
     all n : Node | coloring.n not in coloring.(n.graph)
 }
 
+/* check {empty => noAdjColors[refs, nodeColors]} */
+/* check {single => noAdjColors[refs, nodeColors]} */
+/* check {twoReflexive => noAdjColors[refs, nodeColors]} */
+/* check {reflexiveMany => noAdjColors[refs, nodeColors]} for 5 */
+
+pred manyMiscolored {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+
+    no dists
+    no acOri
+    
+    #Color0 = 1
+    #Color1 = 1
+    nodeColors = Color0->(Node0 + Node1) + Color1->(Node3 + Node2 + Node4)
+}
+
+/* check {manyMiscolored => not noAdjColors[refs, nodeColors]} for 5 */
+
+-- each node has exactly one color
+pred oneColorPerNode[coloring : Color -> Node] {
+    all n : Node | one n.(~coloring)
+}
+
+/* check {empty => oneColorPerNode[nodeColors]} */
+/* check {single => oneColorPerNode[nodeColors]} */
+/* check {twoReflexive => oneColorPerNode[nodeColors]} */
+/* check {reflexiveMany => oneColorPerNode[nodeColors]} for 5 */
+
+/* check {manyMiscolored => oneColorPerNode[nodeColors]} for 5 */
+
+pred manyDuplicateNodeColor {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+
+    no dists
+    no acOri
+    
+    #Color0 = 1
+    #Color1 = 1
+    nodeColors = Color0->(Node0 + Node3 + Node1) +
+        Color1->(Node1 + Node2 + Node4)
+}
+
+/* check {manyDuplicateNodeColor => not oneColorPerNode[nodeColors]} for 5 */
+
 pred validColoring [graph : Node -> Node, coloring : Color -> Node] {
     noAdjColors[graph, coloring]
     oneColorPerNode[coloring]
 }
+
+/* check {empty => validColoring[refs, nodeColors]} */
+/* check {single => validColoring[refs, nodeColors]} */
+/* check {twoReflexive => validColoring[refs, nodeColors]} */
+/* check {reflexiveMany => validColoring[refs, nodeColors]} for 5 */
 
 pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
     validColoring[graph, coloring]
     #(coloring.Node) <= k // number of "used" colors is k or lower
 }
 
+/* check {empty => validKColoring[refs, nodeColors, 0]} */
+/* check {single => validKColoring[refs, nodeColors, 1]} */
+/* check {twoReflexive => validKColoring[refs, nodeColors, 2]} */
+/* check {reflexiveMany => validKColoring[refs, nodeColors, 2]} for 5 */
+
+/* check {empty => validKColoring[refs, nodeColors, 2]} */
+/* check {twoReflexive => validKColoring[refs, nodeColors, 3]} */
+/* check {reflexiveMany => validKColoring[refs, nodeColors, 3]} for 5 */
+
+/* check {empty => not validKColoring[refs, nodeColors, -1]} */
+/* check {twoReflexive => not validKColoring[refs, nodeColors, 1]} */
+/* check {reflexiveMany => not validKColoring[refs, nodeColors, 1]} for 5 */
+
+
+pred threeCompleteGraph {
+    oneOfEach
+    Node = Node0 + Node1 + Node2
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    refs = Node0->(Node1 + Node2) + Node1->(Node0 + Node2) +
+        Node2->(Node0 + Node1)
+
+    no dists
+    no acOri
+    
+    #Color0 = 1
+    #Color1 = 1
+    #Color2 = 1
+    #Color4 = 1
+    nodeColors = Color0->Node0 + Color1->Node1 + Color2->Node2
+}
+
+/* check {threeCompleteGraph => validKColoring[refs, nodeColors, 3]} for 5 */
+/* check {threeCompleteGraph => not validKColoring[refs, nodeColors, 2]} for 5 */
+
 pred kColorable [graph : Node -> Node, k : Int] {
     k >= 0
     some coloring : Color->Node | validKColoring[graph, coloring, k]
 }
 
+// Verify some instance exists (some instance should exist)
+/* run {empty} for 5 Node, exactly 5 Color */
+
+/* check {empty => kColorable[refs, 0]} for 5 Node, exactly 5 Color */
+/* check {empty => kColorable[refs, 1]} for 5 Node, exactly 5 Color */
+/* check {empty => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {single} for 5 Node, exactly 5 Color */
+
+/* check {single => not kColorable[refs, 0]} for 5 Node, exactly 5 Color */
+/* check {single => kColorable[refs, 1]} for 5 Node, exactly 5 Color */
+/* check {single => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {twoReflexive} for 5 Node, exactly 5 Color */
+
+/* check {twoReflexive => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+/* check {twoReflexive => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
+/* check {twoReflexive => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveMany} for 5 Node, exactly 5 Color */
+
+/* check {reflexiveMany => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+/* check {reflexiveMany => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
+/* check {reflexiveMany => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {threeCompleteGraph} for 5 Node, exactly 5 Color */
+
+/* check {threeCompleteGraph => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
+/* check {threeCompleteGraph => kColorable[refs, 4]} for 5 Node, exactly 5 Color */
+/* check {threeCompleteGraph => not kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+
 pred isChromaticNumber [graph : Node->Node, k : Int] {
     kColorable[graph, k]
-    not kColorable[graph, k-1]
+    not kColorable[graph, k.minus[1]]
 }
 
-/* pred longestPathLength [graph : Node -> Node, len : Int] { */
-/*     some path : set Node when valid */
-    
-/* } */
+/* check {threeCompleteGraph => isChromaticNumber[refs, 3]} for 5 Node, exactly 5 Color */
+/* check {threeCompleteGraph => not isChromaticNumber[refs, 4]} for 5 Node, exactly 5 Color */
+/* check {threeCompleteGraph => not isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
 
-/* pred someColoring { */
-/*     defRefs[refs] */
+/* run { */
+/*     reflexiveMany */
+/*     // kColorable[refs, 4] */
 /*     validColoring[refs, nodeColors] */
-/* } */
-
-/* run {someColoring} for exactly 4 Node, exactly 2 Color */
-
-/* pred notThreeColorable { */
-/*     defRefs[refs] */
-/*     not kColorable[refs, 3] */
-/*     no dists */
-/*     no acOri */
-/*     no nodeColors */
-/* } */
-
-/* run {notThreeColorable} for exactly 4 Node, exactly 3 Color */
-
-pred graphChromaticNumberThree {
-    defRefs[refs]
-    isChromaticNumber[refs, 3]
-}
-
-run {graphChromaticNumberThree} for exactly 4 Node, exactly 4 Color
+/* } for  5 */
 
 -- vim: set filetype=forge tabstop=4 softtabstop=4 shiftwidth=4:
