@@ -499,10 +499,4 @@ pred isChromaticNumber [graph : Node->Node, k : Int] {
 /* check {threeCompleteGraph => not isChromaticNumber[refs, 4]} for 5 Node, exactly 5 Color */
 /* check {threeCompleteGraph => not isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
 
-/* run { */
-/*     reflexiveMany */
-/*     // kColorable[refs, 4] */
-/*     validColoring[refs, nodeColors] */
-/* } for  5 */
-
 -- vim: set filetype=forge tabstop=4 softtabstop=4 shiftwidth=4:
