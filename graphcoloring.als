@@ -1,6 +1,6 @@
 sig Node {
     refs: set Node, -- undirected graph
-    acDists: set Node -> one Int, -- distances from node to all other nodes in orientation
+    dists: set Node -> one Int, -- distances from node to all other nodes in orientation
     acOri: set Node -- acyclic orientation for the graph
 }
 
@@ -9,7 +9,7 @@ sig Color {
 }
 
 -- graph is undirected and irreflexive
-pred defRefs[graph : Node -> Node] {
+pred validReflexive[graph : Node -> Node] {
     ~graph in graph
     no iden & graph
 }
@@ -17,11 +17,11 @@ pred defRefs[graph : Node -> Node] {
 pred empty {
     no Node
     no refs
-    no acDists
+    no dists
     no acOri
 }
 
-/* check {empty => defRefs[refs]} */
+/* check {empty => validReflexive[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {empty} */
@@ -77,13 +77,13 @@ pred single {
     Node = Node0
     #Node0 = 1
     no refs
-    acDists = Node0->Node0->0
+    dists = Node0->Node0->0
     no acOri
     #Color0 = 1
     nodeColors = Color0->Node0
 }
 
-/* check {single => defRefs[refs]} */
+/* check {single => validReflexive[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {single} */
@@ -94,7 +94,7 @@ pred twoReflexive {
     #Node0 = 1
     #Node1 = 1
     refs = Node0->Node1 + Node1->Node0
-    acDists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
         Node1->Node0->1
     acOri = Node0->Node1
     #Color0 = 1
@@ -102,10 +102,28 @@ pred twoReflexive {
     nodeColors = Color0->Node0 + Color1->Node1
 }
 
-/* check {twoReflexive => defRefs[refs]} */
+/* check {twoReflexive => validReflexive[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {twoReflexive} */
+
+pred twoDisconnected {
+    oneOfEach
+    Node = Node0 + Node1
+    #Node0 = 1
+    #Node1 = 1
+    refs = none->none
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->-1 +
+        Node1->Node0->-1
+    acOri = none->none
+    #Color0 = 1
+    nodeColors = Color0->Node0 + Color0->Node1
+}
+
+/* check {twoDisconnected => validReflexive[refs]} */
+
+// Verify some instance exists (some instance should exist)
+/* run {twoDisconnected} */
 
 pred twoOneDirection {
     oneOfEach
@@ -113,12 +131,12 @@ pred twoOneDirection {
     #Node0 = 1
     #Node1 = 1
     refs = Node0->Node1
-    acDists = Node0->Node0->0 + Node0->Node0->1 + Node0->Node1->1 +
+    dists = Node0->Node0->0 + Node0->Node0->1 + Node0->Node1->1 +
         Node1->Node0->-1
     no acOri
 }
 
-/* check {twoOneDirection => not defRefs[refs]} */
+/* check {twoOneDirection => not validReflexive[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {twoOneDirection} */
@@ -134,7 +152,7 @@ pred mostlyReflexiveMany {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1
-    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -145,7 +163,7 @@ pred mostlyReflexiveMany {
     no acOri
 }
 
-/* check {mostlyReflexiveMany => not defRefs[refs]} */
+/* check {mostlyReflexiveMany => not validReflexive[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {mostlyReflexiveMany} for 5 */
@@ -161,7 +179,7 @@ pred reflexiveMany {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -181,19 +199,23 @@ pred reflexiveMany {
 // Verify some instance exists (some instance should exist)
 /* run {reflexiveMany} for 5 */
 
-/* check {reflexiveMany => defRefs[refs]} */
+/* check {reflexiveMany => validReflexive[refs]} */
 
 -- defines distance metric for each node (TODO: make general...)
-pred validDists[graph : Node->Node, dists : Node->Node->Int] {
-    all u : Node | u.dists[u] = 0
-    all disj u, v : Node | u.dists[v] = add[min[u.graph.dists[v]], 1]
+pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
+    all u : Node | graphDists[u][u] = 0
+    all disj u, v : Node | {
+        v in u.(^graph) => graphDists[u][v] = add[min[u.graph.graphDists[v] - (-1)], 1]
+        v not in u.(^graph) => graphDists[u][v] = -1
+    }
 }
 
-check {empty => validDists[refs, acDists]}
-check {single => validDists[refs, acDists]}
-check {twoReflexive => validDists[refs, acDists]}
-check {mostlyReflexiveMany => validDists[refs, acDists]}
-check {reflexiveMany => validDists[refs, acDists]}
+/* check {empty => validDists[refs, dists]} */
+/* check {single => validDists[refs, dists]} */
+/* check {twoReflexive => validDists[refs, dists]} */
+/* check {twoDisconnected => validDists[refs, dists]} */
+/* check {mostlyReflexiveMany => validDists[refs, dists]} */
+/* check {reflexiveMany => validDists[refs, dists]} */
 
 pred mostlyReflexiveManyWrongDist {
     oneOfEach
@@ -206,7 +228,7 @@ pred mostlyReflexiveManyWrongDist {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1
-    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -220,7 +242,7 @@ pred mostlyReflexiveManyWrongDist {
 // Verify some instance exists (some instance should exist)
 /* run {mostlyReflexiveManyWrongDist} for 5 */
 
-check {mostlyReflexiveManyWrongDist => not validDists[refs, acDists]} for 5
+/* check {mostlyReflexiveManyWrongDist => not validDists[refs, dists]} for 5 */
 
 pred reflexiveManyWrongDist {
     oneOfEach
@@ -233,7 +255,7 @@ pred reflexiveManyWrongDist {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->2 +
@@ -247,7 +269,7 @@ pred reflexiveManyWrongDist {
 // Verify some instance exists (some instance should exist)
 /* run {reflexiveManyWrongDist} for 5 */
 
-check {reflexiveManyWrongDist => not validDists[refs, acDists]}
+/* check {reflexiveManyWrongDist => not validDists[refs, dists]} */
 
 -- checks acOri is an acyclic orientation of the graph
 pred validOrientation[graph : Node->Node, acOri : Node->Node] {
@@ -263,6 +285,7 @@ pred validOrientation[graph : Node->Node, acOri : Node->Node] {
 /* check {empty => validOrientation[refs, acOri]} */
 /* check {single => validOrientation[refs, acOri]} */
 /* check {twoReflexive => validOrientation[refs, acOri]} */
+/* check {twoDisconnected => validOrientation[refs, acOri]} */
 /* check {reflexiveMany => validOrientation[refs, acOri]} */
 
 pred reflexiveManyInvalidOrientationDup {
@@ -276,7 +299,7 @@ pred reflexiveManyInvalidOrientationDup {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -304,7 +327,7 @@ pred reflexiveManyInvalidOrientationMissing {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -329,6 +352,7 @@ pred noAdjColors [graph : Node -> Node, coloring : Color -> Node]  {
 /* check {empty => noAdjColors[refs, nodeColors]} */
 /* check {single => noAdjColors[refs, nodeColors]} */
 /* check {twoReflexive => noAdjColors[refs, nodeColors]} */
+/* check {twoDisconnected => noAdjColors[refs, nodeColors]} */
 /* check {reflexiveMany => noAdjColors[refs, nodeColors]} for 5 */
 
 pred manyMiscolored {
@@ -343,7 +367,7 @@ pred manyMiscolored {
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
 
-    no acDists
+    no dists
     no acOri
     
     #Color0 = 1
@@ -361,6 +385,7 @@ pred oneColorPerNode[coloring : Color -> Node] {
 /* check {empty => oneColorPerNode[nodeColors]} */
 /* check {single => oneColorPerNode[nodeColors]} */
 /* check {twoReflexive => oneColorPerNode[nodeColors]} */
+/* check {twoDisconnected => oneColorPerNode[nodeColors]} */
 /* check {reflexiveMany => oneColorPerNode[nodeColors]} for 5 */
 
 /* check {manyMiscolored => oneColorPerNode[nodeColors]} for 5 */
@@ -377,7 +402,7 @@ pred manyDuplicateNodeColor {
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
 
-    no acDists
+    no dists
     no acOri
     
     #Color0 = 1
@@ -396,6 +421,7 @@ pred validColoring [graph : Node -> Node, coloring : Color -> Node] {
 /* check {empty => validColoring[refs, nodeColors]} */
 /* check {single => validColoring[refs, nodeColors]} */
 /* check {twoReflexive => validColoring[refs, nodeColors]} */
+/* check {twoDisconnected => validColoring[refs, nodeColors]} */
 /* check {reflexiveMany => validColoring[refs, nodeColors]} for 5 */
 
 pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
@@ -406,14 +432,17 @@ pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
 /* check {empty => validKColoring[refs, nodeColors, 0]} */
 /* check {single => validKColoring[refs, nodeColors, 1]} */
 /* check {twoReflexive => validKColoring[refs, nodeColors, 2]} */
+/* check {twoDisconnected => validKColoring[refs, nodeColors, 1]} */
 /* check {reflexiveMany => validKColoring[refs, nodeColors, 2]} for 5 */
 
 /* check {empty => validKColoring[refs, nodeColors, 2]} */
 /* check {twoReflexive => validKColoring[refs, nodeColors, 3]} */
+/* check {twoDisconnected => validKColoring[refs, nodeColors, 2]} */
 /* check {reflexiveMany => validKColoring[refs, nodeColors, 3]} for 5 */
 
 /* check {empty => not validKColoring[refs, nodeColors, -1]} */
 /* check {twoReflexive => not validKColoring[refs, nodeColors, 1]} */
+/* check {twoDisconnected => not validKColoring[refs, nodeColors, 0]} */
 /* check {reflexiveMany => not validKColoring[refs, nodeColors, 1]} for 5 */
 
 
@@ -426,7 +455,7 @@ pred threeCompleteGraph {
     refs = Node0->(Node1 + Node2) + Node1->(Node0 + Node2) +
         Node2->(Node0 + Node1)
 
-    no acDists
+    no dists
     no acOri
     
     #Color0 = 1
@@ -466,6 +495,13 @@ pred kColorable [graph : Node -> Node, k : Int] {
 /* check {twoReflexive => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
+/* run {twoDisconnected} for 5 Node, exactly 5 Color */
+
+/* check {twoDisconnected => kColorable[refs, 1]} for 5 Node, exactly 5 Color */
+/* check {twoDisconnected => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+/* check {twoDisconnected => not kColorable[refs, 0]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
 /* run {reflexiveMany} for 5 Node, exactly 5 Color */
 
 /* check {reflexiveMany => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
@@ -481,11 +517,46 @@ pred kColorable [graph : Node -> Node, k : Int] {
 
 pred isChromaticNumber [graph : Node->Node, k : Int] {
     kColorable[graph, k]
-    not kColorable[graph, k.minus[1]]
+    not kColorable[graph, minus[k, 1]]
 }
 
 /* check {threeCompleteGraph => isChromaticNumber[refs, 3]} for 5 Node, exactly 5 Color */
 /* check {threeCompleteGraph => not isChromaticNumber[refs, 4]} for 5 Node, exactly 5 Color */
 /* check {threeCompleteGraph => not isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
+
+/* check {twoDisconnected => isChromaticNumber[refs, 1]} for 5 Node, exactly 5 Color */
+/* check {reflexiveMany => isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
+
+fun longestPath[pathDists : Node->Node->one Int] : Int {
+    max[Node.(Node.pathDists)]
+}
+
+pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
+    acDists : Node->Node->one Int] {
+    validOrientation[graph, acOri]
+    validDists[acOri, acDists]
+    no otherAcOri : Node->Node when validOrientation[graph, acOri] | {
+        some otherAcDists : Node->Node->one Int when
+            validDists[otherAcOri, otherAcDists] {
+            longestPath[otherAcDists] < longestPath[acDists]
+        }
+    }
+}
+
+pred setup {
+    validReflexive[refs]
+    minimalLongestLengthOrientation[refs, acOri, dists]
+
+    // avoid clutter
+    no nodeColors
+}
+
+run setup for exactly 5 Node, exactly 5 Color
+
+// only works for a non-empty graph
+check {
+    setup and #Node > 0 => isChromaticNumber[refs, add[longestPath[dists], 1]]
+} for 5 Node, exactly 5 Color
+
 
 -- vim: set filetype=forge tabstop=4 softtabstop=4 shiftwidth=4:
