@@ -1,6 +1,6 @@
 sig Node {
     refs: set Node, -- undirected graph
-    dists: set Node -> Int, -- distances from node to all other nodes
+    acDists: set Node -> one Int, -- distances from node to all other nodes in orientation
     acOri: set Node -- acyclic orientation for the graph
 }
 
@@ -17,8 +17,7 @@ pred defRefs[graph : Node -> Node] {
 pred empty {
     no Node
     no refs
-    no dists
-    no dists
+    no acDists
     no acOri
 }
 
@@ -72,12 +71,13 @@ pred oneOfEach {
     lone Color9
 }
 
+// NOTE: in many of these tests dists 
 pred single {
     oneOfEach
     Node = Node0
     #Node0 = 1
     no refs
-    dists = Node0->Node0->0
+    acDists = Node0->Node0->0
     no acOri
     #Color0 = 1
     nodeColors = Color0->Node0
@@ -94,7 +94,7 @@ pred twoReflexive {
     #Node0 = 1
     #Node1 = 1
     refs = Node0->Node1 + Node1->Node0
-    dists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
+    acDists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
         Node1->Node0->1
     acOri = Node0->Node1
     #Color0 = 1
@@ -113,7 +113,7 @@ pred twoOneDirection {
     #Node0 = 1
     #Node1 = 1
     refs = Node0->Node1
-    dists = Node0->Node0->0 + Node0->Node0->1 + Node0->Node1->1 +
+    acDists = Node0->Node0->0 + Node0->Node0->1 + Node0->Node1->1 +
         Node1->Node0->-1
     no acOri
 }
@@ -134,7 +134,7 @@ pred mostlyReflexiveMany {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1
-    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -161,7 +161,7 @@ pred reflexiveMany {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -183,28 +183,17 @@ pred reflexiveMany {
 
 /* check {reflexiveMany => defRefs[refs]} */
 
-// can be directed graph
-/* fun getDists [graph : Node->Node] : Node->Node->Int { */
-/*     all u : */ 
-    
-/* } */
-
 -- defines distance metric for each node (TODO: make general...)
-pred defDists {
-    all u : Node | all v : Node | {
-        u = v => dists[u][v] = 0
-        v in u.refs => dists[u][v] = 1
-        (v not in u.(^refs)) and (not u = v) => dists[u][v] = -1
-        ((v not in u.refs) and (not u = v) and (v in u.(^refs))) =>
-            dists[u][v] = add[min[dists[u.refs][v]], 1]
-    }
+pred validDists[graph : Node->Node, dists : Node->Node->Int] {
+    all u : Node | u.dists[u] = 0
+    all disj u, v : Node | u.dists[v] = add[min[u.graph.dists[v]], 1]
 }
 
-/* check {empty => defDists} */
-/* check {single => defDists} */
-/* check {twoReflexive => defDists} */
-/* check {mostlyReflexiveMany => defDists} */
-/* check {reflexiveMany => defDists} */
+check {empty => validDists[refs, acDists]}
+check {single => validDists[refs, acDists]}
+check {twoReflexive => validDists[refs, acDists]}
+check {mostlyReflexiveMany => validDists[refs, acDists]}
+check {reflexiveMany => validDists[refs, acDists]}
 
 pred mostlyReflexiveManyWrongDist {
     oneOfEach
@@ -217,7 +206,7 @@ pred mostlyReflexiveManyWrongDist {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1
-    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -231,7 +220,7 @@ pred mostlyReflexiveManyWrongDist {
 // Verify some instance exists (some instance should exist)
 /* run {mostlyReflexiveManyWrongDist} for 5 */
 
-/* check {mostlyReflexiveManyWrongDist => not defDists} for 5 */
+check {mostlyReflexiveManyWrongDist => not validDists[refs, acDists]} for 5
 
 pred reflexiveManyWrongDist {
     oneOfEach
@@ -244,7 +233,7 @@ pred reflexiveManyWrongDist {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->2 +
@@ -258,7 +247,7 @@ pred reflexiveManyWrongDist {
 // Verify some instance exists (some instance should exist)
 /* run {reflexiveManyWrongDist} for 5 */
 
-/* check {reflexiveManyWrongDist => not defDists} */
+check {reflexiveManyWrongDist => not validDists[refs, acDists]}
 
 -- checks acOri is an acyclic orientation of the graph
 pred validOrientation[graph : Node->Node, acOri : Node->Node] {
@@ -287,7 +276,7 @@ pred reflexiveManyInvalidOrientationDup {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -315,7 +304,7 @@ pred reflexiveManyInvalidOrientationMissing {
     refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
-    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+    acDists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
         Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
         Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
@@ -354,7 +343,7 @@ pred manyMiscolored {
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
 
-    no dists
+    no acDists
     no acOri
     
     #Color0 = 1
@@ -388,7 +377,7 @@ pred manyDuplicateNodeColor {
         Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
 
-    no dists
+    no acDists
     no acOri
     
     #Color0 = 1
@@ -437,7 +426,7 @@ pred threeCompleteGraph {
     refs = Node0->(Node1 + Node2) + Node1->(Node0 + Node2) +
         Node2->(Node0 + Node1)
 
-    no dists
+    no acDists
     no acOri
     
     #Color0 = 1
