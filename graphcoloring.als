@@ -131,7 +131,7 @@ pred twoOneDirection {
     #Node0 = 1
     #Node1 = 1
     refs = Node0->Node1
-    dists = Node0->Node0->0 + Node0->Node0->1 + Node0->Node1->1 +
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node0->Node1->1 +
         Node1->Node0->-1
     no acOri
 }
@@ -140,6 +140,25 @@ pred twoOneDirection {
 
 // Verify some instance exists (some instance should exist)
 /* run {twoOneDirection} */
+
+pred threeDistanceEdgeCase {
+    oneOfEach
+    Node = Node0 + Node1 + Node2
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    refs = Node0->Node1 + Node2->Node1
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node0->Node1->1 + Node0->Node2->-1 + Node1->Node0->-1 +
+        Node1->Node2->-1 + Node2->Node0->-1 + Node2->Node1->1
+
+    no acOri
+}
+
+/* check {threeDistanceEdgeCase => not validReflexive[refs]} */
+
+// Verify some instance exists (some instance should exist)
+/* run {threeDistanceEdgeCase} */
 
 pred mostlyReflexiveMany {
     oneOfEach
@@ -214,6 +233,7 @@ pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
 /* check {single => validDists[refs, dists]} */
 /* check {twoReflexive => validDists[refs, dists]} */
 /* check {twoDisconnected => validDists[refs, dists]} */
+/* check {threeDistanceEdgeCase => validDists[refs, dists]} */
 /* check {mostlyReflexiveMany => validDists[refs, dists]} */
 /* check {reflexiveMany => validDists[refs, dists]} */
 
