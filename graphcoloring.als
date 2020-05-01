@@ -507,10 +507,34 @@ pred fourSimpleCycle {
 
 }
 
+pred fourCompleteGraph {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    refs = Node0->(Node1 + Node2 + Node3) + Node1->(Node0 + Node2 + Node3) +
+        Node2->(Node0 + Node1 + Node3) + Node3->(Node0 + Node1 + Node2)
+
+    no dists
+    no acOri
+    
+    #Color0 = 1
+    #Color1 = 1
+    #Color2 = 1
+    #Color4 = 1
+    nodeColors = Color0->Node0 + Color1->Node1 + Color2->Node2 + Color4->Node3
+}
+
 /* check {threeCompleteGraph => validKColoring[refs, nodeColors, 3]} for 5 */
 /* check {threeCompleteGraph => not validKColoring[refs, nodeColors, 2]} for 5 */
-/* check {fourSimpleCycle => validKColoring[refs, nodeColors, 4]} for 5 */
-/* check {fourSimpleCycle => not validKColoring[refs, nodeColors, 3]} for 5 */
+
+/* check {fourSimpleCycle => validKColoring[refs, nodeColors, 3]} for 5 */
+/* check {fourSimpleCycle => not validKColoring[refs, nodeColors, 2]} for 5 */
+
+/* check {fourCompleteGraph => validKColoring[refs, nodeColors, 4]} for 5 */
+/* check {fourCompleteGraph => not validKColoring[refs, nodeColors, 3]} for 5 */
 
 pred kColorable [graph : Node -> Node, k : Int] {
     k >= 0
@@ -562,9 +586,9 @@ pred kColorable [graph : Node -> Node, k : Int] {
 // Verify some instance exists (some instance should exist)
 /* run {fourSimpleCycle} for 5 Node, exactly 5 Color */
 
+/* check {fourSimpleCycle => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
 /* check {fourSimpleCycle => kColorable[refs, 4]} for 5 Node, exactly 5 Color */
-/* check {fourSimpleCycle => kColorable[refs, 5]} for 5 Node, exactly 5 Color */
-/* check {fourSimpleCycle => not kColorable[refs, 3]} for 5 Node, exactly 5 Color */
+/* check {fourSimpleCycle => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
 
 pred isChromaticNumber [graph : Node->Node, k : Int] {
     kColorable[graph, k]
@@ -578,7 +602,7 @@ pred isChromaticNumber [graph : Node->Node, k : Int] {
 /* check {twoDisconnected => isChromaticNumber[refs, 1]} for 5 Node, exactly 5 Color */
 /* check {reflexiveMany => isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
 
-/* check {fourSimpleCycle => isChromaticNumber[refs, 4]} for 5 Node, exactly 5 Color */
+/* check {fourSimpleCycle => isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
 /* check {fourSimpleCycle => not isChromaticNumber[refs, 5]} for 5 Node, exactly 5 Color */
 /* check {fourSimpleCycle => not isChromaticNumber[refs, 3]} for 5 Node, exactly 5 Color */
 
