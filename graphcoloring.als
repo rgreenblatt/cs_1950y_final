@@ -71,7 +71,6 @@ pred oneOfEach {
     lone Color9
 }
 
-// NOTE: in many of these tests dists 
 pred single {
     oneOfEach
     Node = Node0
@@ -220,7 +219,7 @@ pred reflexiveMany {
 
 /* check {reflexiveMany => validReflexive[refs]} */
 
--- defines distance metric for each node (TODO: make general...)
+-- defines distance metric for each node
 pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
     all u : Node | graphDists[u][u] = 0
     all disj u, v : Node | {
