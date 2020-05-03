@@ -1,0 +1,75 @@
+Overview of project topic:
+
+For this project, we wanted to investigate graph coloring and decided to model 
+/ prove a specific property. This property is that any undirected graph has a 
+k-coloring if it has an acyclic orientation whose longest path has at most a 
+length of k.
+
+Language we use:
+
+We started implementing our model in Forge and then switched over to Alloy*
+as we wanted to be able to do higher order quantification. More specifically 
+we wanted to be able to enumerate over all acyclic orientations of an 
+undirected graph and determine the minimum length of the longest path.
+
+Setup / sigs that we use:
+
+For our model, we wanted to be able to represented graphs where each node has a 
+singular color. In order to do this, we have two main sigs: Node and Color. 
+
+The Node sig has three sets within it: refs that defines all the edges in the 
+undirected graph, dists that defines the distance between a Node and all other 
+Nodes in the graph, and acOri that defines the directed edges in the acyclic 
+orientation of the graph. The Color sig has one set, nodeColors, that defines 
+the color of each Node.
+
+In order to have specific Nodes and Colors, we create additional sigs that 
+extend our main two sigs. We have Node1-Node9 and Color1-Color9. We also made a 
+pred oneOfEach that ensures that there is no more than one instance of each of 
+the Node1-Node9 and Color1-Color9 sigs.
+
+Parts of our model and how they fit together:
+
+validReflexive – determines if a graph is a valid undirected graph
+validDists – determines if the distances of the nodes in the graph are valid
+validOrientation – determines if the acyclic orientation of a graph is valid
+noAdjColors – ensures that no two adjacent nodes in a graph have the same color
+oneColorPerNode – ensures that each node in a graph only has a single color
+validColoring – determines if a graph coloring is valid
+validKColoring – determines if a graph coloring is a valid k-coloring
+kColorable – determines if it is possible to color a graph in k colors
+isChromaticNumber – determines if a given number of colors is the smallest 
+                    needed to color a graph
+longestPath – this is a function that outputs the length of the longest path in 
+              an acyclic orientation of a graph
+minimalLongestLengthOrientation – determines if acyclic orientation's longest 
+                                  path's length is the smallest of those of the 
+                                  other acyclic orientations of a graph
+setup – 
+
+
+Testing:
+
+We have also created some preds that serve as instances for testing of our 
+various preds mentioned above. These are listed below.
+
+empty
+single
+twoReflexive
+twoDisconnected
+twoOneDirection
+threeDistanceEdgeGraph
+mostlyReflexiveMany
+reflexiveMany
+mostlyReflexiveManyWrongDists
+reflexiveManyWrongDists
+reflexiveManyInvalidOrientationDup
+reflexiveManyInvalidOrientationMissing
+manyMiscolored
+manyDuplicateNodeColor
+threeCompleteGraph
+fourSimpleCycle
+fourCompleteGraph
+
+
+
