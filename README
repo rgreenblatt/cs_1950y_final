@@ -2,8 +2,8 @@ Overview of project topic:
 
 For this project, we wanted to investigate graph coloring and decided to model 
 / prove a specific property. This property is that any undirected graph has a 
-k-coloring if it has an acyclic orientation whose longest path has at most a 
-length of k.
+k-coloring if it has an acyclic orientation whose longest path has length less
+than k.
 
 Language we use:
 
@@ -18,9 +18,10 @@ For our model, we wanted to be able to represented graphs where each node has a
 singular color. In order to do this, we have two main sigs: Node and Color. 
 
 The Node sig has three sets within it: refs that defines all the edges in the 
-undirected graph, dists that defines the distance between a Node and all other 
-Nodes in the graph, and acOri that defines the directed edges in the acyclic 
-orientation of the graph. The Color sig has one set, nodeColors, that defines 
+undirected graph, acOri that defines the directed edges in the acyclic 
+orientation of the graph which is optimal, dists that defines the distance
+between a Node and all other Nodes in the acyclic orientation for a graph.
+The Color sig has one set, nodeColors, that defines 
 the color of each Node.
 
 In order to have specific Nodes and Colors, we create additional sigs that 
@@ -45,7 +46,7 @@ longestPath – this is a function that outputs the length of the longest path i
 minimalLongestLengthOrientation – determines if acyclic orientation's longest 
                                   path's length is the smallest of those of the 
                                   other acyclic orientations of a graph
-setup – 
+setup – all of the predicates combined needed to verify the property.
 
 
 Testing:
