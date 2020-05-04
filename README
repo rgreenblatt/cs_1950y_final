@@ -71,6 +71,9 @@ manyDuplicateNodeColor
 threeCompleteGraph
 fourSimpleCycle
 fourCompleteGraph
+minimumOrientation
+reflexiveNotMinimum
+reflexiveManyMinimumOrientation
 
 
 

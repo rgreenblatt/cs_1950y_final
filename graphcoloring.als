@@ -621,7 +621,7 @@ fun longestPath[pathDists : Node->Node->one Int] : Int {
     max[Node.(Node.pathDists)]
 }
 
-pred reflexiveManyLongestOrientation {
+pred reflexiveManyMinimumOrientation {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -696,8 +696,12 @@ pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
 /* check {minimumOrientation => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveNotLongest} for 5 */
-/* check {reflexiveNotLongest => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+/* run {reflexiveNotMinimum} for 5 */
+/* check {reflexiveNotMinimum => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveManyMinimumOrientation} for 5 */
+/* check {reflexiveManyMinimumOrientation => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
 pred setup {
     validReflexive[refs]
