@@ -54,26 +54,27 @@ Testing:
 We have also created some preds that serve as instances for testing of our 
 various preds mentioned above. These are listed below.
 
-empty
-single
-twoReflexive
-twoDisconnected
-twoOneDirection
-threeDistanceEdgeGraph
-mostlyReflexiveMany
-reflexiveMany
-mostlyReflexiveManyWrongDists
-reflexiveManyWrongDists
-reflexiveManyInvalidOrientationDup
-reflexiveManyInvalidOrientationMissing
-manyMiscolored
-manyDuplicateNodeColor
-threeCompleteGraph
-fourSimpleCycle
-fourCompleteGraph
-minimumOrientation
-reflexiveNotMinimum
-reflexiveManyMinimumOrientation
+empty – the empty graph
+single – single node graph
+twoSymmetric – graph of two connected nodes
+twoDisconnected – graph of two disconnected nodes
+twoOneDirection – directed graph with two nodes
+threeDistanceEdgeGraph – directed graph with three nodes and two edges
+mostlySymmetricMany – directed graph with mostly symmetric edges
+SymmetricMany – undirected graph (all symmetric edges)
+mostlySymmetricManyWrongDists – directed graph with mostly symmetric edges and 
+				some wrong distances
+symmetricManyWrongDists – undirected graph (all symmetric edges) with some wrong distances
+symmetricManyInvalidOrientationDup – undirected graph with invalid acyclic orientation
+symmetricManyInvalidOrientationMissing – another undirected graph with invalid acyclic 						 orientation
+manyMiscolored – graph with improper coloring
+manyDuplicateNodeColor – graph where some nodes have more than one color
+threeCompleteGraph – complete graph of three nodes
+fourSimpleCycle – simple cycle graph with four nodes
+fourCompleteGraph – complete graph with four nodes
+minimumOrientation – graph whose acyclic orientation has the minimum longest length
+symmetricNotMinimum – graph whose acyclic orientation does not have the minimum longest 		      length
+symmetricManyMinimumOrientation – bigger graph whose acyclic orientation does not have the 				  minimum longest length
 
 
 
