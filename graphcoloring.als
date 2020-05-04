@@ -22,7 +22,7 @@ pred validSymmetric[graph : Node -> Node] {
 pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
     all u : Node | graphDists[u][u] = 0
     all disj u, v : Node | {
-        v in u.(^graph) => graphDists[u][v] = add[min[u.graph.graphDists[v] - (-1)], 1]
+        v in u.(^graph) => graphDists[u][v] = add[max[u.graph.graphDists[v] - (-1)], 1]
         v not in u.(^graph) => graphDists[u][v] = -1
     }
 }
@@ -79,7 +79,7 @@ pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
     acDists : Node->Node->one Int] {
     validOrientation[graph, acOri]
     validDists[acOri, acDists]
-    no otherAcOri : Node->Node when validOrientation[graph, acOri] | {
+    no otherAcOri : Node->Node when validOrientation[graph, otherAcOri] | {
         some otherAcDists : Node->Node->one Int when
             validDists[otherAcOri, otherAcDists] {
             longestPath[otherAcDists] < longestPath[acDists]
