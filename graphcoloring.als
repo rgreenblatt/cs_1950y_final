@@ -9,7 +9,7 @@ sig Color {
 }
 
 -- graph is undirected and irreflexive
-pred validReflexive[graph : Node -> Node] {
+pred validSymmetric[graph : Node -> Node] {
     ~graph in graph
     no iden & graph
 }
@@ -21,7 +21,7 @@ pred empty {
     no acOri
 }
 
-/* check {empty => validReflexive[refs]} */
+/* check {empty => validSymmetric[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {empty} */
@@ -82,12 +82,12 @@ pred single {
     nodeColors = Color0->Node0
 }
 
-/* check {single => validReflexive[refs]} */
+/* check {single => validSymmetric[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {single} */
 
-pred twoReflexive {
+pred twoSymmetric {
     oneOfEach
     Node = Node0 + Node1
     #Node0 = 1
@@ -101,10 +101,10 @@ pred twoReflexive {
     nodeColors = Color0->Node0 + Color1->Node1
 }
 
-/* check {twoReflexive => validReflexive[refs]} */
+/* check {twoSymmetric => validSymmetric[refs]} */
 
 // Verify some instance exists (some instance should exist)
-/* run {twoReflexive} */
+/* run {twoSymmetric} */
 
 pred twoDisconnected {
     oneOfEach
@@ -119,7 +119,7 @@ pred twoDisconnected {
     nodeColors = Color0->Node0 + Color0->Node1
 }
 
-/* check {twoDisconnected => validReflexive[refs]} */
+/* check {twoDisconnected => validSymmetric[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {twoDisconnected} */
@@ -135,7 +135,7 @@ pred twoOneDirection {
     no acOri
 }
 
-/* check {twoOneDirection => not validReflexive[refs]} */
+/* check {twoOneDirection => not validSymmetric[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {twoOneDirection} */
@@ -154,12 +154,12 @@ pred threeDistanceEdgeCase {
     no acOri
 }
 
-/* check {threeDistanceEdgeCase => not validReflexive[refs]} */
+/* check {threeDistanceEdgeCase => not validSymmetric[refs]} */
 
 // Verify some instance exists (some instance should exist)
 /* run {threeDistanceEdgeCase} */
 
-pred mostlyReflexiveMany {
+pred mostlySymmetricMany {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -181,12 +181,12 @@ pred mostlyReflexiveMany {
     no acOri
 }
 
-/* check {mostlyReflexiveMany => not validReflexive[refs]} */
+/* check {mostlySymmetricMany => not validSymmetric[refs]} */
 
 // Verify some instance exists (some instance should exist)
-/* run {mostlyReflexiveMany} for 5 */
+/* run {mostlySymmetricMany} for 5 */
 
-pred reflexiveMany {
+pred symmetricMany {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -215,9 +215,9 @@ pred reflexiveMany {
 }
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveMany} for 5 */
+/* run {symmetricMany} for 5 */
 
-/* check {reflexiveMany => validReflexive[refs]} */
+/* check {symmetricMany => validSymmetric[refs]} */
 
 -- defines distance metric for each node
 pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
@@ -230,13 +230,13 @@ pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
 
 /* check {empty => validDists[refs, dists]} */
 /* check {single => validDists[refs, dists]} */
-/* check {twoReflexive => validDists[refs, dists]} */
+/* check {twoSymmetric => validDists[refs, dists]} */
 /* check {twoDisconnected => validDists[refs, dists]} */
 /* check {threeDistanceEdgeCase => validDists[refs, dists]} */
-/* check {mostlyReflexiveMany => validDists[refs, dists]} */
-/* check {reflexiveMany => validDists[refs, dists]} */
+/* check {mostlySymmetricMany => validDists[refs, dists]} */
+/* check {symmetricMany => validDists[refs, dists]} */
 
-pred mostlyReflexiveManyWrongDist {
+pred mostlySymmetricManyWrongDist {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -259,11 +259,11 @@ pred mostlyReflexiveManyWrongDist {
 }
 
 // Verify some instance exists (some instance should exist)
-/* run {mostlyReflexiveManyWrongDist} for 5 */
+/* run {mostlySymmetricManyWrongDist} for 5 */
 
-/* check {mostlyReflexiveManyWrongDist => not validDists[refs, dists]} for 5 */
+/* check {mostlySymmetricManyWrongDist => not validDists[refs, dists]} for 5 */
 
-pred reflexiveManyWrongDist {
+pred symmetricManyWrongDist {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -286,9 +286,9 @@ pred reflexiveManyWrongDist {
 }
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveManyWrongDist} for 5 */
+/* run {symmetricManyWrongDist} for 5 */
 
-/* check {reflexiveManyWrongDist => not validDists[refs, dists]} */
+/* check {symmetricManyWrongDist => not validDists[refs, dists]} */
 
 -- checks acOri is an acyclic orientation of the graph
 pred validOrientation[graph : Node->Node, acOri : Node->Node] {
@@ -303,11 +303,11 @@ pred validOrientation[graph : Node->Node, acOri : Node->Node] {
 
 /* check {empty => validOrientation[refs, acOri]} */
 /* check {single => validOrientation[refs, acOri]} */
-/* check {twoReflexive => validOrientation[refs, acOri]} */
+/* check {twoSymmetric => validOrientation[refs, acOri]} */
 /* check {twoDisconnected => validOrientation[refs, acOri]} */
-/* check {reflexiveMany => validOrientation[refs, acOri]} */
+/* check {symmetricMany => validOrientation[refs, acOri]} */
 
-pred reflexiveManyInvalidOrientationDup {
+pred symmetricManyInvalidOrientationDup {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -331,11 +331,11 @@ pred reflexiveManyInvalidOrientationDup {
 }
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveManyInvalidOrientationDup} for 5 */
+/* run {symmetricManyInvalidOrientationDup} for 5 */
 
-/* check {reflexiveManyInvalidOrientationDup => not validOrientation[refs, acOri]} for 5 */
+/* check {symmetricManyInvalidOrientationDup => not validOrientation[refs, acOri]} for 5 */
 
-pred reflexiveManyInvalidOrientationMissing {
+pred symmetricManyInvalidOrientationMissing {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -359,9 +359,9 @@ pred reflexiveManyInvalidOrientationMissing {
 }
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveManyInvalidOrientationMissing} for 5 */
+/* run {symmetricManyInvalidOrientationMissing} for 5 */
 
-/* check {reflexiveManyInvalidOrientationMissing => not validOrientation[refs, acOri]} for 5 */
+/* check {symmetricManyInvalidOrientationMissing => not validOrientation[refs, acOri]} for 5 */
 
 -- ensures that no two adjacent nodes should have the same color
 pred noAdjColors [graph : Node -> Node, coloring : Color -> Node]  {
@@ -370,9 +370,9 @@ pred noAdjColors [graph : Node -> Node, coloring : Color -> Node]  {
 
 /* check {empty => noAdjColors[refs, nodeColors]} */
 /* check {single => noAdjColors[refs, nodeColors]} */
-/* check {twoReflexive => noAdjColors[refs, nodeColors]} */
+/* check {twoSymmetric => noAdjColors[refs, nodeColors]} */
 /* check {twoDisconnected => noAdjColors[refs, nodeColors]} */
-/* check {reflexiveMany => noAdjColors[refs, nodeColors]} for 5 */
+/* check {symmetricMany => noAdjColors[refs, nodeColors]} for 5 */
 
 pred manyMiscolored {
     oneOfEach
@@ -403,9 +403,9 @@ pred oneColorPerNode[coloring : Color -> Node] {
 
 /* check {empty => oneColorPerNode[nodeColors]} */
 /* check {single => oneColorPerNode[nodeColors]} */
-/* check {twoReflexive => oneColorPerNode[nodeColors]} */
+/* check {twoSymmetric => oneColorPerNode[nodeColors]} */
 /* check {twoDisconnected => oneColorPerNode[nodeColors]} */
-/* check {reflexiveMany => oneColorPerNode[nodeColors]} for 5 */
+/* check {symmetricMany => oneColorPerNode[nodeColors]} for 5 */
 
 /* check {manyMiscolored => oneColorPerNode[nodeColors]} for 5 */
 
@@ -439,9 +439,9 @@ pred validColoring [graph : Node -> Node, coloring : Color -> Node] {
 
 /* check {empty => validColoring[refs, nodeColors]} */
 /* check {single => validColoring[refs, nodeColors]} */
-/* check {twoReflexive => validColoring[refs, nodeColors]} */
+/* check {twoSymmetric => validColoring[refs, nodeColors]} */
 /* check {twoDisconnected => validColoring[refs, nodeColors]} */
-/* check {reflexiveMany => validColoring[refs, nodeColors]} for 5 */
+/* check {symmetricMany => validColoring[refs, nodeColors]} for 5 */
 
 pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
     validColoring[graph, coloring]
@@ -450,19 +450,19 @@ pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
 
 /* check {empty => validKColoring[refs, nodeColors, 0]} */
 /* check {single => validKColoring[refs, nodeColors, 1]} */
-/* check {twoReflexive => validKColoring[refs, nodeColors, 2]} */
+/* check {twoSymmetric => validKColoring[refs, nodeColors, 2]} */
 /* check {twoDisconnected => validKColoring[refs, nodeColors, 1]} */
-/* check {reflexiveMany => validKColoring[refs, nodeColors, 2]} for 5 */
+/* check {symmetricMany => validKColoring[refs, nodeColors, 2]} for 5 */
 
 /* check {empty => validKColoring[refs, nodeColors, 2]} */
-/* check {twoReflexive => validKColoring[refs, nodeColors, 3]} */
+/* check {twoSymmetric => validKColoring[refs, nodeColors, 3]} */
 /* check {twoDisconnected => validKColoring[refs, nodeColors, 2]} */
-/* check {reflexiveMany => validKColoring[refs, nodeColors, 3]} for 5 */
+/* check {symmetricMany => validKColoring[refs, nodeColors, 3]} for 5 */
 
 /* check {empty => not validKColoring[refs, nodeColors, -1]} */
-/* check {twoReflexive => not validKColoring[refs, nodeColors, 1]} */
+/* check {twoSymmetric => not validKColoring[refs, nodeColors, 1]} */
 /* check {twoDisconnected => not validKColoring[refs, nodeColors, 0]} */
-/* check {reflexiveMany => not validKColoring[refs, nodeColors, 1]} for 5 */
+/* check {symmetricMany => not validKColoring[refs, nodeColors, 1]} for 5 */
 
 
 pred threeCompleteGraph {
@@ -474,8 +474,8 @@ pred threeCompleteGraph {
     refs = Node0->(Node1 + Node2) + Node1->(Node0 + Node2) +
         Node2->(Node0 + Node1)
 
-    no dists
-    no acOri
+    --no dists
+    --no acOri
     
     #Color0 = 1
     #Color1 = 1
@@ -495,8 +495,8 @@ pred fourSimpleCycle {
     refs = Node0->(Node1 + Node2) + Node1->(Node0 + Node3) +
         Node2->(Node0 + Node3) + Node3->(Node1 + Node2)
 
-    no dists
-    no acOri
+    --no dists
+    --no acOri
     
     #Color0 = 1
     #Color1 = 1
@@ -517,8 +517,8 @@ pred fourCompleteGraph {
     refs = Node0->(Node1 + Node2 + Node3) + Node1->(Node0 + Node2 + Node3) +
         Node2->(Node0 + Node1 + Node3) + Node3->(Node0 + Node1 + Node2)
 
-    no dists
-    no acOri
+    --no dists
+    --no acOri
     
     #Color0 = 1
     #Color1 = 1
@@ -556,11 +556,11 @@ pred kColorable [graph : Node -> Node, k : Int] {
 /* check {single => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
-/* run {twoReflexive} for 5 Node, exactly 5 Color */
+/* run {twoSymmetric} for 5 Node, exactly 5 Color */
 
-/* check {twoReflexive => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
-/* check {twoReflexive => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
-/* check {twoReflexive => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
+/* check {twoSymmetric => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+/* check {twoSymmetric => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
+/* check {twoSymmetric => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
 /* run {twoDisconnected} for 5 Node, exactly 5 Color */
@@ -570,11 +570,11 @@ pred kColorable [graph : Node -> Node, k : Int] {
 /* check {twoDisconnected => not kColorable[refs, 0]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveMany} for 5 Node, exactly 5 Color */
+/* run {symmetricMany} for 5 Node, exactly 5 Color */
 
-/* check {reflexiveMany => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
-/* check {reflexiveMany => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
-/* check {reflexiveMany => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
+/* check {symmetricMany => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
+/* check {symmetricMany => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
+/* check {symmetricMany => not kColorable[refs, 1]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
 /* run {threeCompleteGraph} for 5 Node, exactly 5 Color */
@@ -607,7 +607,7 @@ pred isChromaticNumber [graph : Node->Node, k : Int] {
 /* check {threeCompleteGraph => not isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
 
 /* check {twoDisconnected => isChromaticNumber[refs, 1]} for 5 Node, exactly 5 Color */
-/* check {reflexiveMany => isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
+/* check {symmetricMany => isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
 
 /* check {fourSimpleCycle => isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
 /* check {fourSimpleCycle => not isChromaticNumber[refs, 5]} for 5 Node, exactly 5 Color */
@@ -621,7 +621,35 @@ fun longestPath[pathDists : Node->Node->one Int] : Int {
     max[Node.(Node.pathDists)]
 }
 
-pred reflexiveManyMinimumOrientation {
+
+pred symmetricManyNotLongestOrientation {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+
+    acOri = Node0->Node1 +  Node2->Node0 + Node3->Node2 +  Node3->Node4 +
+         Node4->Node0 +  Node3->Node1
+    
+    no nodeColors
+}
+
+
+pred symmetricManyLongestOrientation {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -647,7 +675,7 @@ pred reflexiveManyMinimumOrientation {
     no nodeColors
 }
 
-pred reflexiveNotMinimum {
+pred symmetricNotMinimum {
     oneOfEach
     Node = Node0 + Node1 + Node2
     #Node0 = 1
@@ -691,20 +719,28 @@ pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
     }
 }
 
+
+/*check {empty => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color
+check {twoSymmetric => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color*/
+
+/* check {symmetricMany => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {symmetricManyNotLongestOrientation} for 5*/
+
 // Verify some instance exists (some instance should exist)
 /* run {minimumOrientation} for 5 */
 /* check {minimumOrientation => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
-// Verify some instance exists (some instance should exist)
-/* run {reflexiveNotMinimum} for 5 */
-/* check {reflexiveNotMinimum => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+/* check {symmetricManyNotLongestOrientation => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveManyMinimumOrientation} for 5 */
-/* check {reflexiveManyMinimumOrientation => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+/* run {symmetricNotLongest} for 5 */
+/* check {symmetricNotLongest => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+
 
 pred setup {
-    validReflexive[refs]
+    validSymmetric[refs]
     minimalLongestLengthOrientation[refs, acOri, dists]
 
     // avoid clutter
