@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+//------------------------PREDICATES------------------------
+//----------------------------------------------------------
+
 sig Node {
     refs: set Node, -- undirected graph
     dists: set Node -> one Int, -- distances from node to all other nodes in orientation
@@ -14,6 +18,79 @@ pred validSymmetric[graph : Node -> Node] {
     no iden & graph
 }
 
+-- defines distance metric for each node
+pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
+    all u : Node | graphDists[u][u] = 0
+    all disj u, v : Node | {
+        v in u.(^graph) => graphDists[u][v] = add[min[u.graph.graphDists[v] - (-1)], 1]
+        v not in u.(^graph) => graphDists[u][v] = -1
+    }
+}
+
+-- checks acOri is an acyclic orientation of the graph
+pred validOrientation[graph : Node->Node, acOri : Node->Node] {
+    acOri in graph
+    all u: Node | {
+        -- acyclic
+        u->u not in ^acOri
+         -- exactly one direction picked for each edge
+        all v : u.graph | (u->v in acOri iff v->u not in acOri)
+    }
+}
+
+-- ensures that no two adjacent nodes should have the same color
+pred noAdjColors [graph : Node -> Node, coloring : Color -> Node]  {
+    all n : Node | coloring.n not in coloring.(n.graph)
+}
+
+-- each node has exactly one color
+pred oneColorPerNode[coloring : Color -> Node] {
+    all n : Node | one n.(~coloring)
+}
+
+-- every node has a color and no adjacent nodes have the same color
+pred validColoring [graph : Node -> Node, coloring : Color -> Node] {
+    noAdjColors[graph, coloring]
+    oneColorPerNode[coloring]
+}
+
+-- valid coloring and no more than k colors
+pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
+    validColoring[graph, coloring]
+    #(coloring.Node) <= k // number of "used" colors is k or lower
+}
+
+-- graph can be colored with k colors
+pred kColorable [graph : Node -> Node, k : Int] {
+    k >= 0
+    some coloring : Color->Node | validKColoring[graph, coloring, k]
+}
+
+pred isChromaticNumber [graph : Node->Node, k : Int] {
+    kColorable[graph, k]
+    not kColorable[graph, minus[k, 1]]
+}
+
+fun longestPath[pathDists : Node->Node->one Int] : Int {
+    max[Node.(Node.pathDists)]
+}
+
+pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
+    acDists : Node->Node->one Int] {
+    validOrientation[graph, acOri]
+    validDists[acOri, acDists]
+    no otherAcOri : Node->Node when validOrientation[graph, acOri] | {
+        some otherAcDists : Node->Node->one Int when
+            validDists[otherAcOri, otherAcDists] {
+            longestPath[otherAcDists] < longestPath[acDists]
+        }
+    }
+}
+
+//----------------------------------------------------------
+//------------------------TESTING---------------------------
+//----------------------------------------------------------
+
 pred empty {
     no Node
     no refs
@@ -22,9 +99,6 @@ pred empty {
 }
 
 /* check {empty => validSymmetric[refs]} */
-
-// Verify some instance exists (some instance should exist)
-/* run {empty} */
 
 // Dirty hack to allow naming
 sig Node0 extends Node {}
@@ -219,15 +293,6 @@ pred symmetricMany {
 
 /* check {symmetricMany => validSymmetric[refs]} */
 
--- defines distance metric for each node
-pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
-    all u : Node | graphDists[u][u] = 0
-    all disj u, v : Node | {
-        v in u.(^graph) => graphDists[u][v] = add[min[u.graph.graphDists[v] - (-1)], 1]
-        v not in u.(^graph) => graphDists[u][v] = -1
-    }
-}
-
 /* check {empty => validDists[refs, dists]} */
 /* check {single => validDists[refs, dists]} */
 /* check {twoSymmetric => validDists[refs, dists]} */
@@ -289,17 +354,6 @@ pred symmetricManyWrongDist {
 /* run {symmetricManyWrongDist} for 5 */
 
 /* check {symmetricManyWrongDist => not validDists[refs, dists]} */
-
--- checks acOri is an acyclic orientation of the graph
-pred validOrientation[graph : Node->Node, acOri : Node->Node] {
-    acOri in graph
-    all u: Node | {
-        -- acyclic
-        u->u not in ^acOri
-         -- exactly one direction picked for each edge
-        all v : u.graph | (u->v in acOri iff v->u not in acOri)
-    }
-}
 
 /* check {empty => validOrientation[refs, acOri]} */
 /* check {single => validOrientation[refs, acOri]} */
@@ -363,11 +417,6 @@ pred symmetricManyInvalidOrientationMissing {
 
 /* check {symmetricManyInvalidOrientationMissing => not validOrientation[refs, acOri]} for 5 */
 
--- ensures that no two adjacent nodes should have the same color
-pred noAdjColors [graph : Node -> Node, coloring : Color -> Node]  {
-    all n : Node | coloring.n not in coloring.(n.graph)
-}
-
 /* check {empty => noAdjColors[refs, nodeColors]} */
 /* check {single => noAdjColors[refs, nodeColors]} */
 /* check {twoSymmetric => noAdjColors[refs, nodeColors]} */
@@ -395,11 +444,6 @@ pred manyMiscolored {
 }
 
 /* check {manyMiscolored => not noAdjColors[refs, nodeColors]} for 5 */
-
--- each node has exactly one color
-pred oneColorPerNode[coloring : Color -> Node] {
-    all n : Node | one n.(~coloring)
-}
 
 /* check {empty => oneColorPerNode[nodeColors]} */
 /* check {single => oneColorPerNode[nodeColors]} */
@@ -432,21 +476,11 @@ pred manyDuplicateNodeColor {
 
 /* check {manyDuplicateNodeColor => not oneColorPerNode[nodeColors]} for 5 */
 
-pred validColoring [graph : Node -> Node, coloring : Color -> Node] {
-    noAdjColors[graph, coloring]
-    oneColorPerNode[coloring]
-}
-
 /* check {empty => validColoring[refs, nodeColors]} */
 /* check {single => validColoring[refs, nodeColors]} */
 /* check {twoSymmetric => validColoring[refs, nodeColors]} */
 /* check {twoDisconnected => validColoring[refs, nodeColors]} */
 /* check {symmetricMany => validColoring[refs, nodeColors]} for 5 */
-
-pred validKColoring [graph : Node -> Node, coloring : Color -> Node, k : Int] {
-    validColoring[graph, coloring]
-    #(coloring.Node) <= k // number of "used" colors is k or lower
-}
 
 /* check {empty => validKColoring[refs, nodeColors, 0]} */
 /* check {single => validKColoring[refs, nodeColors, 1]} */
@@ -536,27 +570,14 @@ pred fourCompleteGraph {
 /* check {fourCompleteGraph => validKColoring[refs, nodeColors, 4]} for 5 */
 /* check {fourCompleteGraph => not validKColoring[refs, nodeColors, 3]} for 5 */
 
-pred kColorable [graph : Node -> Node, k : Int] {
-    k >= 0
-    some coloring : Color->Node | validKColoring[graph, coloring, k]
-}
-
-// Verify some instance exists (some instance should exist)
-/* run {empty} for 5 Node, exactly 5 Color */
-
 /* check {empty => kColorable[refs, 0]} for 5 Node, exactly 5 Color */
 /* check {empty => kColorable[refs, 1]} for 5 Node, exactly 5 Color */
 /* check {empty => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
 
-// Verify some instance exists (some instance should exist)
-/* run {single} for 5 Node, exactly 5 Color */
 
 /* check {single => not kColorable[refs, 0]} for 5 Node, exactly 5 Color */
 /* check {single => kColorable[refs, 1]} for 5 Node, exactly 5 Color */
 /* check {single => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
-
-// Verify some instance exists (some instance should exist)
-/* run {twoSymmetric} for 5 Node, exactly 5 Color */
 
 /* check {twoSymmetric => kColorable[refs, 2]} for 5 Node, exactly 5 Color */
 /* check {twoSymmetric => kColorable[refs, 3]} for 5 Node, exactly 5 Color */
@@ -597,11 +618,6 @@ pred kColorable [graph : Node -> Node, k : Int] {
 /* check {fourCompleteGraph => kColorable[refs, 4]} for 5 Node, exactly 5 Color */
 /* check {fourCompleteGraph => not kColorable[refs, 3]} for 5 Node, exactly 5 Color */
 
-pred isChromaticNumber [graph : Node->Node, k : Int] {
-    kColorable[graph, k]
-    not kColorable[graph, minus[k, 1]]
-}
-
 /* check {threeCompleteGraph => isChromaticNumber[refs, 3]} for 5 Node, exactly 5 Color */
 /* check {threeCompleteGraph => not isChromaticNumber[refs, 4]} for 5 Node, exactly 5 Color */
 /* check {threeCompleteGraph => not isChromaticNumber[refs, 2]} for 5 Node, exactly 5 Color */
@@ -616,11 +632,6 @@ pred isChromaticNumber [graph : Node->Node, k : Int] {
 /* check {fourSimpleCycle => isChromaticNumber[refs, 4]} for 5 Node, exactly 5 Color */
 /* check {fourSimpleCycle => not isChromaticNumber[refs, 5]} for 5 Node, exactly 5 Color */
 /* check {fourSimpleCycle => not isChromaticNumber[refs, 3]} for 5 Node, exactly 5 Color */
-
-fun longestPath[pathDists : Node->Node->one Int] : Int {
-    max[Node.(Node.pathDists)]
-}
-
 
 pred symmetricManyNotLongestOrientation {
     oneOfEach
@@ -647,7 +658,6 @@ pred symmetricManyNotLongestOrientation {
     
     no nodeColors
 }
-
 
 pred symmetricManyLongestOrientation {
     oneOfEach
@@ -707,21 +717,8 @@ pred minimumOrientation {
     no nodeColors
 }
 
-pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
-    acDists : Node->Node->one Int] {
-    validOrientation[graph, acOri]
-    validDists[acOri, acDists]
-    no otherAcOri : Node->Node when validOrientation[graph, acOri] | {
-        some otherAcDists : Node->Node->one Int when
-            validDists[otherAcOri, otherAcDists] {
-            longestPath[otherAcDists] < longestPath[acDists]
-        }
-    }
-}
-
-
-/*check {empty => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color
-check {twoSymmetric => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color*/
+/* check {empty => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+/* check {twoSymmetric => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color*/
 
 /* check {symmetricMany => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
