@@ -621,6 +621,92 @@ fun longestPath[pathDists : Node->Node->one Int] : Int {
     max[Node.(Node.pathDists)]
 }
 
+
+pred reflexiveManyNotLongestOrientation {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
+        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
+        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
+        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
+        Node3->Node4->1 + Node4->Node3->1
+
+    acOri = Node0->Node1 +  Node2->Node0 + Node3->Node2 +  Node3->Node4 +
+         Node4->Node0 +  Node3->Node1
+    
+    no nodeColors
+}
+
+
+pred reflexiveManyLongestOrientation {
+    oneOfEach
+    Node = Node0 + Node1 + Node2 + Node3 + Node4
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    #Node3 = 1
+    #Node4 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0 +
+        Node2->Node3 + Node3->Node2 + Node3->Node4 + Node4->Node3 +
+        Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+        Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
+        Node1->Node0->-1 + Node0->Node2->-1 + Node2->Node0->1 +
+        Node0->Node3->-1 + Node3->Node0->2 + Node0->Node4->-1 +
+        Node4->Node0->1 + Node1->Node2->-1 + Node2->Node1->2 +
+        Node1->Node3->-1 + Node3->Node1->1 + Node2->Node3->-1 +
+        Node3->Node2->1 + Node2->Node4->-1 + Node4->Node2->-1 +
+        Node3->Node4->1 + Node4->Node3->-1
+
+    acOri = Node0->Node1 +  Node2->Node0 + Node3->Node2 +  Node3->Node4 +
+         Node4->Node0 +  Node3->Node1
+    
+    no nodeColors
+}
+
+pred reflexiveNotMinimum {
+    oneOfEach
+    Node = Node0 + Node1 + Node2
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+	Node0->Node1->1 + Node1->Node0->-1 + Node1->Node2->-1 + 
+	Node2->Node1->2 + Node0->Node2->-1 + Node2->Node0->1
+
+    acOri = Node0->Node1 +  Node2->Node0
+    
+    no nodeColors
+}
+
+pred minimumOrientation {
+    oneOfEach
+    Node = Node0 + Node1 + Node2
+    #Node0 = 1
+    #Node1 = 1
+    #Node2 = 1
+    refs = Node0->Node1 + Node1->Node0 + Node0->Node2 + Node2->Node0
+    dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
+	Node0->Node1->1 + Node1->Node0->-1 + Node1->Node2->-1 + 
+	Node2->Node1->-1 + Node0->Node2->1 + Node2->Node0->-1
+
+    acOri = Node0->Node1 +  Node0->Node2
+    
+    no nodeColors
+}
+
 pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
     acDists : Node->Node->one Int] {
     validOrientation[graph, acOri]
@@ -633,8 +719,24 @@ pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
     }
 }
 
+
 /*check {empty => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color
 check {twoSymmetric => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color*/
+
+/* check {reflexiveMany => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveManyNotLongestOrientation} for 5*/
+
+// Verify some instance exists (some instance should exist)
+/* run {minimumOrientation} for 5 */
+/* check {minimumOrientation => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+
+/* check {reflexiveManyNotLongestOrientation => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+
+// Verify some instance exists (some instance should exist)
+/* run {reflexiveNotLongest} for 5 */
+/* check {reflexiveNotLongest => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
 
 pred setup {
