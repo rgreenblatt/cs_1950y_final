@@ -622,7 +622,7 @@ fun longestPath[pathDists : Node->Node->one Int] : Int {
 }
 
 
-pred reflexiveManyNotLongestOrientation {
+pred symmetricManyNotLongestOrientation {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -649,7 +649,7 @@ pred reflexiveManyNotLongestOrientation {
 }
 
 
-pred reflexiveManyLongestOrientation {
+pred symmetricManyLongestOrientation {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
     #Node0 = 1
@@ -675,7 +675,7 @@ pred reflexiveManyLongestOrientation {
     no nodeColors
 }
 
-pred reflexiveNotMinimum {
+pred symmetricNotMinimum {
     oneOfEach
     Node = Node0 + Node1 + Node2
     #Node0 = 1
@@ -723,20 +723,20 @@ pred minimalLongestLengthOrientation[graph : Node->Node, acOri : Node->Node,
 /*check {empty => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color
 check {twoSymmetric => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color*/
 
-/* check {reflexiveMany => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+/* check {symmetricMany => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveManyNotLongestOrientation} for 5*/
+/* run {symmetricManyNotLongestOrientation} for 5*/
 
 // Verify some instance exists (some instance should exist)
 /* run {minimumOrientation} for 5 */
 /* check {minimumOrientation => minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
-/* check {reflexiveManyNotLongestOrientation => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+/* check {symmetricManyNotLongestOrientation => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
 // Verify some instance exists (some instance should exist)
-/* run {reflexiveNotLongest} for 5 */
-/* check {reflexiveNotLongest => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
+/* run {symmetricNotLongest} for 5 */
+/* check {symmetricNotLongest => not minimalLongestLengthOrientation[refs, acOri, dists]} for 5 Node, exactly 5 Color */
 
 
 pred setup {
