@@ -22,7 +22,7 @@ pred validSymmetric[graph : Node -> Node] {
 pred validDists[graph : Node->Node, graphDists : Node->Node->Int] {
     all u : Node | graphDists[u][u] = 0
     all disj u, v : Node | {
-        v in u.(^graph) => graphDists[u][v] = add[max[u.graph.graphDists[v] - (-1)], 1]
+        v in u.(^graph) => graphDists[u][v] = add[max[u.graph.graphDists[v]], 1]
         v not in u.(^graph) => graphDists[u][v] = -1
     }
 }
@@ -252,7 +252,7 @@ pred mostlySymmetricMany {
         Node1->Node3->2 + Node3->Node1->1 + Node2->Node3->1 +
         Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
         Node3->Node4->1 + Node4->Node3->1
-    no acOri
+	no acOri
 }
 
 /* check {mostlySymmetricMany => not validSymmetric[refs]} */
@@ -273,12 +273,13 @@ pred symmetricMany {
         Node0->Node4 + Node4->Node0 + Node3->Node1 + Node1->Node3
     dists = Node0->Node0->0 + Node1->Node1->0 + Node2->Node2->0 +
         Node3->Node3->0 + Node4->Node4->0 + Node0->Node1->1 +
-        Node1->Node0->1 + Node0->Node2->1 + Node2->Node0->1 +
-        Node0->Node3->2 + Node3->Node0->2 + Node0->Node4->1 +
-        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->2 +
-        Node1->Node3->1 + Node3->Node1->1 + Node2->Node3->1 +
-        Node3->Node2->1 + Node2->Node4->2 + Node4->Node2->2 +
-        Node3->Node4->1 + Node4->Node3->1
+        Node1->Node0->-1 + Node0->Node2->3 + Node2->Node0->-1 +
+        Node0->Node3->2 + Node3->Node0->-1 + Node0->Node4->-1 +
+        Node4->Node0->1 + Node1->Node2->2 + Node2->Node1->-1 +
+        Node1->Node3->1 + Node3->Node1->-1 + Node2->Node3->-1 +
+        Node3->Node2->1 + Node2->Node4->-1 + Node4->Node2->4 +
+        Node3->Node4->-1 + Node4->Node3->3 + Node4->Node1->2 +
+        Node1->Node4->-1
 
     acOri = Node0->Node1 +  Node0->Node2 + Node3->Node2 +  Node4->Node3 +
          Node4->Node0 +  Node1->Node3
@@ -289,18 +290,15 @@ pred symmetricMany {
 }
 
 // Verify some instance exists (some instance should exist)
-/* run {symmetricMany} for 5 */
+//run {symmetricMany} for 5 Node, 5 Color
 
 /* check {symmetricMany => validSymmetric[refs]} */
 
 /* check {empty => validDists[refs, dists]} */
 /* check {single => validDists[refs, dists]} */
-/* check {twoSymmetric => validDists[refs, dists]} */
 /* check {twoDisconnected => validDists[refs, dists]} */
 /* check {threeDistanceEdgeCase => validDists[refs, dists]} */
-/* check {mostlySymmetricMany => validDists[refs, dists]} */
-/* check {symmetricMany => validDists[refs, dists]} */
-
+ // check {symmetricMany => validDists[acOri, dists]} 
 pred mostlySymmetricManyWrongDist {
     oneOfEach
     Node = Node0 + Node1 + Node2 + Node3 + Node4
@@ -325,8 +323,6 @@ pred mostlySymmetricManyWrongDist {
 
 // Verify some instance exists (some instance should exist)
 /* run {mostlySymmetricManyWrongDist} for 5 */
-
-/* check {mostlySymmetricManyWrongDist => not validDists[refs, dists]} for 5 */
 
 pred symmetricManyWrongDist {
     oneOfEach
